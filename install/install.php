@@ -37,14 +37,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step === 2) {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
 
-            // Ejecutar schema
-            $sql = file_get_contents(__DIR__ . '/schema.sql');
-            $pdo->exec($sql);
+            // Restaurar backup completo o schema limpio
+            $restore_backup = !empty($_POST['restore_backup']);
+            $backup_file = dirname(__DIR__) . '/db-backup.sql';
 
-            // Crear usuario admin
-            $hash = password_hash($admin_pass, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
-            $stmt->execute([$admin_name, $admin_email, $hash, 'admin']);
+            if ($restore_backup && file_exists($backup_file)) {
+                // Restaurar backup completo (incluye schema + datos + artículos)
+                $sql = file_get_contents($backup_file);
+                // Quitar líneas CREATE/USE DATABASE porque ya estamos conectados
+                $sql = preg_replace('/^(CREATE|USE|DROP) DATABASE[^;]*;/m', '', $sql);
+                $pdo->exec($sql);
+
+                // Actualizar password del admin existente o crear uno nuevo
+                $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+                $stmt->execute([$admin_email]);
+                $hash = password_hash($admin_pass, PASSWORD_DEFAULT);
+                if ($stmt->fetch()) {
+                    $stmt = $pdo->prepare('UPDATE users SET name = ?, password_hash = ?, role = ? WHERE email = ?');
+                    $stmt->execute([$admin_name, $hash, 'admin', $admin_email]);
+                } else {
+                    $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
+                    $stmt->execute([$admin_name, $admin_email, $hash, 'admin']);
+                }
+            } else {
+                // Instalación limpia: solo schema
+                $sql = file_get_contents(__DIR__ . '/schema.sql');
+                $pdo->exec($sql);
+
+                // Crear usuario admin
+                $hash = password_hash($admin_pass, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
+                $stmt->execute([$admin_name, $admin_email, $hash, 'admin']);
+            }
 
             // Actualizar config.php
             $config_path = dirname(__DIR__) . '/includes/config.php';
@@ -192,6 +216,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step === 2) {
                 <input type="password" name="admin_pass" minlength="8" required>
             </div>
 
+            <?php
+            $has_backup = file_exists(dirname(__DIR__) . '/db-backup.sql');
+            if ($has_backup): ?>
+            <div class="section-title">Datos existentes</div>
+            <div class="form-group">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+                    <input type="checkbox" name="restore_backup" value="1" checked style="width:auto;">
+                    Restaurar backup con artículos y contenido existente
+                </label>
+                <small style="color:#666; display:block; margin-top:4px;">Se encontró <code>db-backup.sql</code>. Marca para restaurar todos los datos, o desmarca para empezar desde cero.</small>
+            </div>
+            <?php endif; ?>
+
             <div class="section-title">URL del sitio</div>
             <div class="form-group">
                 <label>URL (sin barra final)</label>
@@ -204,7 +241,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $step === 2) {
     <?php elseif ($step === 3): ?>
         <!-- Paso 3: Completado -->
         <div class="success">&#10004; ¡Instalación completada correctamente!</div>
-        <h2>Siguiente pasos</h2>
+        <?php if (!empty($_SESSION['restored_backup'])): ?>
+            <p style="margin-bottom:15px; color:#555;">Se restauró el backup con todos los artículos y datos existentes.</p>
+        <?php endif; ?>
+        <h2>Siguientes pasos</h2>
         <ul class="checklist">
             <li><span class="check-ok">1.</span> <a href="/admin/login.php" class="link">Accede al panel de administración</a></li>
             <li><span class="check-ok">2.</span> Crea tu primer artículo en el blog</li>
