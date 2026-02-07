@@ -43,25 +43,24 @@ echo "[2/2] Servidor PHP..."
 pkill -f "php -S" 2>/dev/null || true
 sleep 1
 
-php -S 0.0.0.0:80 -t "$PROJECT_DIR" "$PROJECT_DIR/router.php" &>/tmp/php-emc2.log &
+PHP_PORT=8081
+php -S 127.0.0.1:$PHP_PORT -t "$PROJECT_DIR" "$PROJECT_DIR/router.php" &>/tmp/php-emc2.log &
 PHP_PID=$!
 sleep 2
 
 if kill -0 $PHP_PID 2>/dev/null; then
-    echo "  -> PHP OK (PID: $PHP_PID)"
+    echo "  -> PHP OK en puerto $PHP_PORT (PID: $PHP_PID)"
 else
     echo "  ERROR: PHP no arrancó. Ver /tmp/php-emc2.log"
     exit 1
 fi
 
-# Obtener IP del servidor
-SERVER_IP=$(hostname -I | awk '{print $1}')
-
 echo ""
 echo "=== Servicios activos ==="
-echo "  Blog:  http://$SERVER_IP/blog/"
-echo "  Admin: http://$SERVER_IP/admin/"
-echo "  Login: admin@emc2legal.com / Emc2Legal2026!"
+echo "  PHP escuchando en: 127.0.0.1:$PHP_PORT"
+echo "  Nginx redirige:    https://emc2legal.com/blog/"
+echo "  Admin:             https://emc2legal.com/admin/"
+echo "  Login:             admin@emc2legal.com / Emc2Legal2026!"
 echo ""
 echo "=== Comandos útiles ==="
 echo "  Parar PHP:    kill $PHP_PID"
