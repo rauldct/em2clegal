@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  emc2legal:
+    build: .
+    container_name: emc2legal-blog
+    ports:
+      - "80:80"
+    volumes:
+      - ./db-backup.sql:/workspace/db-backup.sql
+      - uploads:/workspace/assets/uploads
+    restart: always
+
+volumes:
+  uploads:

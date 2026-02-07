@@ -1,0 +1,22 @@
+# Uploads (user content)
+assets/uploads/2*
+
+# Runtime
+/tmp/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code internal
+.claude/
+seed_articles.sql
+SEED_SUMMARY.md
+index.html2
+index2.html
+indexseo.html

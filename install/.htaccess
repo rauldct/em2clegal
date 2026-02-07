@@ -1,0 +1,3 @@
+# Permitir acceso solo durante la instalación
+# Después de instalar, descomentar la línea siguiente:
+# Require all denied

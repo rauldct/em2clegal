@@ -1,0 +1,50 @@
+RewriteEngine On
+RewriteBase /
+
+# Forzar HTTPS (descomentar en producción)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# --- Blog: URLs limpias ---
+
+# /blog/sitemap.xml
+RewriteRule ^blog/sitemap\.xml$ /blog/sitemap.xml.php [L]
+
+# /blog/feed.xml
+RewriteRule ^blog/feed\.xml$ /blog/feed.xml.php [L]
+
+# /blog/buscar?q=...
+RewriteRule ^blog/buscar$ /blog/search.php [L,QSA]
+
+# /blog/categoria/slug
+RewriteRule ^blog/categoria/([a-z0-9-]+)$ /blog/category.php?slug=$1 [L,QSA]
+
+# /blog/categoria/slug/page/N
+RewriteRule ^blog/categoria/([a-z0-9-]+)/page/([0-9]+)$ /blog/category.php?slug=$1&page=$2 [L,QSA]
+
+# /blog/etiqueta/slug
+RewriteRule ^blog/etiqueta/([a-z0-9-]+)$ /blog/tag.php?slug=$1 [L,QSA]
+
+# /blog/etiqueta/slug/page/N
+RewriteRule ^blog/etiqueta/([a-z0-9-]+)/page/([0-9]+)$ /blog/tag.php?slug=$1&page=$2 [L,QSA]
+
+# /blog/page/N
+RewriteRule ^blog/page/([0-9]+)$ /blog/index.php?page=$1 [L,QSA]
+
+# /blog/ (listado)
+RewriteRule ^blog/?$ /blog/index.php [L]
+
+# /blog/post-slug (artículo individual - debe ir al final)
+RewriteRule ^blog/([a-z0-9-]+)$ /blog/post.php?slug=$1 [L,QSA]
+
+# --- Proteger directorios sensibles ---
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Proteger archivos sensibles
+<FilesMatch "\.(sql|log|sh)$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /install/
+Disallow: /templates/
+
+# AI Crawlers welcome
+User-agent: GPTBot
+Allow: /blog/
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /blog/
+
+User-agent: ChatGPT-User
+Allow: /blog/
+
+User-agent: anthropic-ai
+Allow: /blog/
+
+User-agent: ClaudeBot
+Allow: /blog/
+
+User-agent: PerplexityBot
+Allow: /blog/
+
+User-agent: Bytespider
+Allow: /blog/
+
+Sitemap: https://emc2legal.com/blog/sitemap.xml
