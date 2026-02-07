@@ -166,8 +166,8 @@ bash /workspace/init-server.sh
 
 ```bash
 # Reinicializar MariaDB desde cero
-rm -rf /var/lib/mysql/*
-mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+rm -rf /workspace/mysql-data/*
+mariadb-install-db --user=mysql --datadir=/workspace/mysql-data
 bash /workspace/init-server.sh
 ```
 

@@ -5,6 +5,9 @@ assets/uploads/2*
 /tmp/
 *.log
 
+# MariaDB persistent data (lives in /workspace but not in git)
+mysql-data/
+
 # IDE
 .vscode/
 .idea/

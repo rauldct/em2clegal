@@ -24,7 +24,7 @@ mkdir -p /etc/supervisor/conf.d
 # Crear config de supervisor (no persiste fuera de /workspace)
 cat > /etc/supervisor/conf.d/emc2legal.conf << 'SUPEOF'
 [program:mariadb]
-command=/usr/sbin/mariadbd --user=mysql --socket=/run/mysqld/mysqld.sock --datadir=/var/lib/mysql
+command=/usr/sbin/mariadbd --user=mysql --socket=/run/mysqld/mysqld.sock --datadir=/workspace/mysql-data
 autostart=true
 autorestart=true
 priority=10
@@ -43,9 +43,9 @@ stderr_logfile=/var/log/php-supervisor-err.log
 SUPEOF
 
 # 3. Inicializar MariaDB si es necesario
-if [ ! -d "/var/lib/mysql/mysql" ]; then
+if [ ! -d "/workspace/mysql-data/mysql" ]; then
     echo "[3/5] Inicializando MariaDB..."
-    mariadb-install-db --user=mysql --datadir=/var/lib/mysql >/dev/null 2>&1
+    mariadb-install-db --user=mysql --datadir=/workspace/mysql-data >/dev/null 2>&1
 else
     echo "[3/5] MariaDB data OK"
 fi
