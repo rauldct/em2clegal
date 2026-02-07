@@ -14,13 +14,14 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 echo "Directorio del proyecto: $PROJECT_DIR"
 echo ""
 
-# 1. Instalar MariaDB
-echo "[1/5] Instalando MariaDB..."
+# 1. Verificar MySQL/MariaDB
+echo "[1/5] Verificando MySQL..."
 if command -v mysql &>/dev/null; then
-    echo "  -> MariaDB ya está instalado"
+    echo "  -> MySQL ya está instalado"
 else
-    yum install -y mariadb-server mariadb
-    echo "  -> MariaDB instalado"
+    echo "  ERROR: MySQL no está instalado. Instálalo con:"
+    echo "    yum install -y mysql-community-server"
+    exit 1
 fi
 
 # 2. Instalar PHP y extensiones
@@ -37,11 +38,20 @@ else
     echo "  -> PHP instalado"
 fi
 
-# 3. Arrancar MariaDB
-echo "[3/5] Arrancando MariaDB..."
-systemctl start mariadb
-systemctl enable mariadb
-echo "  -> MariaDB activo y habilitado al arranque"
+# 3. Arrancar MySQL
+echo "[3/5] Arrancando MySQL..."
+# Detectar nombre del servicio (mysqld en CentOS 7, mariadb en otros)
+if systemctl list-unit-files | grep -q mysqld.service; then
+    SVC_NAME="mysqld"
+elif systemctl list-unit-files | grep -q mariadb.service; then
+    SVC_NAME="mariadb"
+else
+    echo "  ERROR: No se encontró servicio MySQL/MariaDB"
+    exit 1
+fi
+systemctl start "$SVC_NAME"
+systemctl enable "$SVC_NAME"
+echo "  -> $SVC_NAME activo y habilitado al arranque"
 
 # 4. Configurar password de root en MariaDB
 echo "[4/5] Configurando base de datos..."

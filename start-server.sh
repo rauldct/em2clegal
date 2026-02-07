@@ -9,13 +9,23 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== EMC2 Legal - Arrancando servicios ==="
 
-# 1. Asegurar que MariaDB está corriendo
-echo "[1/2] MariaDB..."
-if systemctl is-active mariadb &>/dev/null; then
-    echo "  -> MariaDB ya está activo"
+# 1. Asegurar que MySQL está corriendo
+echo "[1/2] MySQL..."
+# Detectar nombre del servicio (mysqld en CentOS 7, mariadb en otros)
+if systemctl list-unit-files | grep -q mysqld.service; then
+    SVC_NAME="mysqld"
+elif systemctl list-unit-files | grep -q mariadb.service; then
+    SVC_NAME="mariadb"
 else
-    systemctl start mariadb
-    echo "  -> MariaDB arrancado"
+    echo "  ERROR: No se encontró servicio MySQL/MariaDB"
+    exit 1
+fi
+
+if systemctl is-active "$SVC_NAME" &>/dev/null; then
+    echo "  -> MySQL ya está activo"
+else
+    systemctl start "$SVC_NAME"
+    echo "  -> MySQL arrancado"
 fi
 
 # Verificar conexión a la BD
